@@ -1,0 +1,49 @@
+// routes/api.js
+const express = require('express');
+const router = express.Router();
+const { proxyRequest } = require('../utils/httpClient');
+const { proxyRequest1 } = require('../utils/httpClient');
+const validateRequestBody = require('../middlewares/validateRequest');
+
+router.post('/getmessage', validateRequestBody, async (req, res) => {
+  try {
+    const response = await proxyRequest1({
+      method: 'POST',
+      headers: req.headers,
+      body: req.body
+    });
+    
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    console.error('Proxy error:', error);
+    
+    const status = error.response?.status || 500;
+    const errorData = error.response?.data || { error: error.message };
+    
+    res.status(status).json({
+      error: 'Proxy request failed',
+      details: errorData
+    });
+  }
+});
+
+router.get('/cors-proxy/clients', async (req, res) => {
+  try {
+    const response = await proxyRequest({
+      method: 'GET',
+      url: 'http://ec2-18-223-241-107.us-east-2.compute.amazonaws.com:3001/agentic-mcp-server/clients',
+      headers: req.headers
+    });
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    console.error('CORS Proxy error:', error);
+    const status = error.response?.status || 500;
+    const errorData = error.response?.data || { error: error.message };
+    res.status(status).json({
+      error: 'CORS proxy request failed',
+      details: errorData
+    });
+  }
+});
+
+module.exports = router;
