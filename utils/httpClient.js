@@ -72,4 +72,23 @@ async function proxyRequest2({ method, url, headers, body }) {
   });
 }
 
-module.exports = { proxyRequest, proxyRequest1, proxyRequest2, proxyRequest3 };
+async function proxyRequestN8n({ method, url, headers, body }) {
+  try {
+    const response = await axios({
+      method,
+      url,
+      headers: {
+      'Content-Type': 'application/json'
+    },
+      data: body,
+    });
+    return {
+      status: response.status,
+      data: response.data
+    };
+  } catch (error) {
+    throw error;
+  }
+}
+
+module.exports = { proxyRequest, proxyRequest1, proxyRequest2, proxyRequest3, proxyRequestN8n };

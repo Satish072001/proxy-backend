@@ -5,6 +5,7 @@ const { proxyRequest } = require('../utils/httpClient');
 const { proxyRequest1 } = require('../utils/httpClient');
 const { proxyRequest2 } = require('../utils/httpClient');
 const { proxyRequest3 } = require('../utils/httpClient');
+const { proxyRequestN8n } = require('../utils/httpClient');
 
 router.post('/getmessage', async (req, res) => {
   try {
@@ -84,6 +85,29 @@ router.get('/leads', async (req, res) => {
     const errorData = error.response?.data || { error: error.message };
     res.status(status).json({
       error: 'Leads proxy request failed',
+      details: errorData
+    });
+  }
+});
+
+router.post('/n8n-chat', async (req, res) => {
+  try {
+    const response = await proxyRequestN8n({
+      method: 'POST',
+      url: 'https://pawarpan.app.n8n.cloud/webhook/chat',
+      headers: req.headers,
+      body: req.body
+    });
+
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    console.error('n8n Chat Proxy error:', error);
+
+    const status = error.response?.status || 500;
+    const errorData = error.response?.data || { error: error.message };
+
+    res.status(status).json({
+      error: 'n8n Chat proxy request failed',
       details: errorData
     });
   }
