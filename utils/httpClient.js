@@ -5,9 +5,6 @@ const logger = require('./logger');
 const TARGET_API = process.env.TARGET_API;
 
 async function proxyRequest1({ method, headers, body }) {
-  // Filter out headers that shouldn't be forwarded
-  //const { origin, referer, 'accept-encoding': _ , ...filteredHeaders } = headers || {};
-  
   const config = {
     method: method.toLowerCase(),
     url: TARGET_API,
@@ -52,4 +49,27 @@ async function proxyRequest({ method, url, headers, body }) {
   });
 }
 
-module.exports = { proxyRequest, proxyRequest1 };
+async function proxyRequest3({ method, url, headers, body }) {
+  const axios = require('axios');
+  const targetUrl = url;
+  return axios({
+    method,
+    url: targetUrl,
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+}
+
+async function proxyRequest2({ method, url, headers, body }) {
+  const axios = require('axios');
+  const targetUrl = url;
+  return axios({
+    method: method.toLowerCase(),
+    url: targetUrl,
+    headers,
+    data: body
+  });
+}
+
+module.exports = { proxyRequest, proxyRequest1, proxyRequest2, proxyRequest3 };

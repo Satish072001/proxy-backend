@@ -3,9 +3,10 @@ const express = require('express');
 const router = express.Router();
 const { proxyRequest } = require('../utils/httpClient');
 const { proxyRequest1 } = require('../utils/httpClient');
-const validateRequestBody = require('../middlewares/validateRequest');
+const { proxyRequest2 } = require('../utils/httpClient');
+const { proxyRequest3 } = require('../utils/httpClient');
 
-router.post('/getmessage', validateRequestBody, async (req, res) => {
+router.post('/getmessage', async (req, res) => {
   try {
     const response = await proxyRequest1({
       method: 'POST',
@@ -27,6 +28,29 @@ router.post('/getmessage', validateRequestBody, async (req, res) => {
   }
 });
 
+router.post('/zerodha-agent-chat', async (req, res) => {
+  try {
+    const response = await proxyRequest2({
+      method: 'POST',
+      url: 'http://54.69.201.106:5678/webhook/zerodha-agent-chat',
+      headers: req.headers,
+      body: req.body
+    });
+    
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    console.error('Zerodha Agent Chat Proxy error:', error);
+    
+    const status = error.response?.status || 500;
+    const errorData = error.response?.data || { error: error.message };
+    
+    res.status(status).json({
+      error: 'Zerodha Agent Chat proxy request failed',
+      details: errorData
+    });
+  }
+});
+
 router.get('/cors-proxy/clients', async (req, res) => {
   try {
     const response = await proxyRequest({
@@ -41,6 +65,25 @@ router.get('/cors-proxy/clients', async (req, res) => {
     const errorData = error.response?.data || { error: error.message };
     res.status(status).json({
       error: 'CORS proxy request failed',
+      details: errorData
+    });
+  }
+});
+
+router.get('/leads', async (req, res) => {
+  try {
+    const response = await proxyRequest3({
+      method: 'GET',
+      url: 'http://54.70.91.219/leads',
+      headers: req.headers
+    });
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    console.error('Leads Proxy error:', error);
+    const status = error.response?.status || 500;
+    const errorData = error.response?.data || { error: error.message };
+    res.status(status).json({
+      error: 'Leads proxy request failed',
       details: errorData
     });
   }
